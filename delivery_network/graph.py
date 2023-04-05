@@ -857,10 +857,10 @@ def truckperpath(dict_route, dict_camion, tree):
     """
     dict_route_complete = dict_route
     profondeurs, parents = tree.find_parents(1)
-    #check = 0
+    check = 0
     for trajet in dict_route_complete:
-        #check = check + 1
-        #print(check)
+        check = check + 1
+        print(check)
         src, dest, gain = dict_route[trajet]
         # On cherche le min_power du trajet
         inutile, p = tree.min_power_opti(src, dest, profondeurs, parents)
@@ -994,13 +994,46 @@ def knapsack_dynamic(B, dict_route_complete):
                 K[i][j]=K[i-1][j]
     return K[n][int(B)]
 
-h = graph_from_file("input/network.1.in")
-h_mst = h.kruskal()
-r = routes_from_file("input/routes.1.in")
-t = trucks_from_file("input/trucks.1.in")
+def rapport(B,dict_route_complete):
 
-z =  truckperpath(r,t,h_mst)
-print(knapsack_dynamic(25e5, z))
+    Liste_camions_rapports = []
+    for camion in dict_route_complete:
+        numero_camion = camion
+        utilite_camion = dict_route_complete[camion][2]
+        cout_camion = dict_route_complete[camion][5]
+        list_camion = [numero_camion, utilite_camion / cout_camion]
+        Liste_camions_rapports.append(list_camion)
+
+    Liste_triee = sorted(Liste_camions_rapports, key=lambda x: x[1])
+    print(Liste_triee)
+
+    somme_cout = 0
+    utilite = 0
+    Liste_camion_finale = []
+
+    for j in range(len(Liste_triee)):
+        numero = Liste_triee[j][0]
+        somme_cout = somme_cout + dict_route_complete[numero][5]
+        if somme_cout < B:
+            Liste_camion_finale.append(numero)
+            utilite = utilite + dict_route_complete[numero][2]
+        else: 
+            return Liste_camion_finale, utilite
+
+    return Liste_camion_finale, utilite
+
+h = graph_from_file("input/network.2.in")
+h_mst = h.kruskal()
+r = routes_from_file("input/routes.2.in")
+t = trucks_from_file("input/trucks.2.in")
+
+z = truckperpath(r, t, h_mst)
+#print(z)
+a, b = rapport(25e9,z)
+print(b, "rapport")
+e, f, d = knapsack_greedy(25e9, z)
+print(d, "greedy")
+#print(knapsack_dynamic(25e9, z))
 
 """
 #print(knapsack_brute_force(25e5, dict_route_complete))
