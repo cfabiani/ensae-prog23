@@ -898,7 +898,7 @@ def knapsack_dynamic(B, dict_route_complete):
     return K[n][int(B)]
 
 
-def knapsack_dynamic82(B, dict_route_complete):
+def knapsack_dynamic_2(B, dict_route_complete):
 
     """_summary_
     args:
@@ -925,33 +925,79 @@ def knapsack_dynamic82(B, dict_route_complete):
                 K[i][j]=K[i-1][j]
     return K[n][B//50000]
 
+
 def rapport(B,dict_route_complete):
+    """summary
 
-    Liste_camions_rapports = []
-    for camion in dict_route_complete:
-        numero_camion = camion
-        utilite_camion = dict_route_complete[camion][2]
-        cout_camion = dict_route_complete[camion][5]
-        list_camion = [numero_camion, utilite_camion / cout_camion]
-        Liste_camions_rapports.append(list_camion)
+    """
 
-    Liste_triee = sorted(Liste_camions_rapports, key=lambda x: x[1])
-
+    #On commence par établir la liste des trajets avec le camion qui
+    #l'effectue et la rapport utilite/cout du trajet
+    Liste_trajets_rapports = []
+    for trajet in dict_route_complete:
+        numero_trajet = trajet
+        numero_camion = dict_route_complete[trajet][4]
+        utilite_trajet = dict_route_complete[trajet][2]
+        cout_trajet = dict_route_complete[trajet][5]
+        list_trajet = [numero_trajet, numero_camion, utilite_trajet / cout_trajet]
+        Liste_trajets_rapports.append(list_trajet)         
+    #On trie la liste par rapport au rapport utilite/cout
+    Liste_triee = sorted(Liste_trajets_rapports, key=lambda x: x[1])  
+    #On ajoute les camions des trajets avec les meilleurs rapports
+    #jusqu'à remplir le budget
     somme_cout = 0
     utilite = 0
-    Liste_camion_finale = []
+    Liste_trajet_finale = []
 
     for j in range(len(Liste_triee)):
         numero = Liste_triee[j][0]
+        camion = Liste_triee[j][1]
         somme_cout = somme_cout + dict_route_complete[numero][5]
         if somme_cout < B:
-            Liste_camion_finale.append(numero)
+            Liste_trajet_finale.append(camion)
             utilite = utilite + dict_route_complete[numero][2]
-        else: 
-            return Liste_camion_finale, utilite
+        else:
+            return Liste_trajet_finale, utilite
 
-    return Liste_camion_finale, utilite
+    return Liste_trajet_finale, utilite
 
+def rapport2(B,dict_route_complete,n_ameliorations):
+    """summary
+
+    """
+
+    #On commence par établir la liste des trajets avec le camion qui
+    #l'effectue et la rapport utilite/cout du trajet
+    Liste_trajets_rapports = []
+    for trajet in dict_route_complete:
+        numero_trajet = trajet
+        numero_camion = dict_route_complete[trajet][4]
+        utilite_trajet = dict_route_complete[trajet][2]
+        cout_trajet = dict_route_complete[trajet][5]
+        list_trajet = [numero_trajet, numero_camion, utilite_trajet / cout_trajet]
+        Liste_trajets_rapports.append(list_trajet)         
+    #On trie la liste par rapport au rapport utilite/cout
+    Liste_triee = sorted(Liste_trajets_rapports, key=lambda x: x[1])  
+    #On ajoute les camions des trajets avec les meilleurs rapports
+    #jusqu'à remplir le budget
+    somme_cout = 0
+    utilite = 0
+    Liste_trajet_finale = []
+    for j in range(len(Liste_triee)):
+        numero = Liste_triee[j][0]
+        camion = Liste_triee[j][1]
+        somme_cout = somme_cout + dict_route_complete[numero][5]
+        if somme_cout < B:
+            Liste_trajet_finale.append(camion)
+            utilite = utilite + dict_route_complete[numero][2]
+        else:
+            return Liste_trajet_finale, utilite
+
+    #On améliore le résultat
+    for i in n_ameliorations:
+        index = np.randint(len(Liste_trajet_finale)-1)
+        
+    return Liste_trajet_finale, utilite
 
 
 h = graph_from_file("input/network.2.in")
@@ -960,9 +1006,11 @@ r = routes_from_file("input/routes.2.in")
 t = trucks_from_file("input/trucks.2.in")
 z = truckperpath(r, t, h_mst)
 #print(knapsack_dynamic(2500000, z))
-a, b = rapport(25e6,z)
+a, b = rapport(25e9,z)
+print(a)
 print(b, "rapport")
-print(knapsack_dynamic82(25000000, z))
+
+#print(knapsack_dynamic_2(25000000, z))
 
 
 #print(z)
