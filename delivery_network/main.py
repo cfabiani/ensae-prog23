@@ -45,6 +45,7 @@ def temps_routes_opti(filename, filename2):
 
 
 def routes_from_file(filename):
+    # Cette fonction lit les fichiers routes.x.in comme graph_from_file
     file = open(filename, 'r')
     lines = file.readlines()
     file.close()
@@ -60,6 +61,7 @@ def routes_from_file(filename):
 
 
 def trucks_from_file(filename):
+    # Cette fonction lit les fichiers trucks.x.in comme graph_from_file
     file = open(filename, 'r')
     lines = file.readlines()
     file.close()
@@ -88,10 +90,10 @@ def truckperpath(dict_route, dict_camion, tree):
     """
     dict_route_complete = dict_route
     profondeurs, parents = tree.find_parents(1)
-    # check = 0
+    check = 0
     for trajet in dict_route_complete:
-        # check = check + 1
-        # print(check)
+        check = check + 1
+        print(check)
         src, dest, gain = dict_route[trajet]
         # On cherche le min_power du trajet
         inutile, p = tree.min_power_opti(src, dest, profondeurs, parents)
@@ -198,7 +200,18 @@ def knapsack_dynamic_2(B, dict_route_complete):
 
 
 def rapport(B, dict_route_complete):
-    """summary
+    """
+    args:
+        B (int) : Budget
+        dict_route_complete (dict): dictionnaire des camions affectées à des
+        trajets
+    returns:
+        liste : liste des trajets choisis et des camions associes
+        int : utilite totale
+
+    Cette fonction implémente un algorithme glouton pour résoudre de manière
+    locale en choisissant les trajets avec le meilleur rapport utilite/cout
+    jusqu'à remplir le budget.
 
     """
 
@@ -225,50 +238,11 @@ def rapport(B, dict_route_complete):
         camion = Liste_triee[j][1]
         somme_cout = somme_cout + dict_route_complete[numero][5]
         if somme_cout < B:
-            Liste_trajet_finale.append(camion)
+            Liste_trajet_finale.append([numero, camion])
             utilite = utilite + dict_route_complete[numero][2]
         else:
             return Liste_trajet_finale, utilite
-
     return Liste_trajet_finale, utilite
-
-"""
-def rapport2(B, dict_route_complete, n_ameliorations):
-
-
-    # On commence par établir la liste des trajets avec le camion qui
-    # l'effectue et la rapport utilite/cout du trajet
-    Liste_trajets_rapports = []
-    for trajet in dict_route_complete:
-        numero_trajet = trajet
-        numero_camion = dict_route_complete[trajet][4]
-        utilite_trajet = dict_route_complete[trajet][2]
-        cout_trajet = dict_route_complete[trajet][5]
-        list_trajet = [numero_trajet, numero_camion, utilite_trajet / cout_trajet]
-        Liste_trajets_rapports.append(list_trajet)
-    # On trie la liste par rapport au rapport utilite/cout
-    Liste_triee = sorted(Liste_trajets_rapports, key=lambda x: x[1])
-    # On ajoute les camions des trajets avec les meilleurs rapports
-    # jusqu'à remplir le budget
-    somme_cout = 0
-    utilite = 0
-    Liste_trajet_finale = []
-    for j in range(len(Liste_triee)):
-        numero = Liste_triee[j][0]
-        camion = Liste_triee[j][1]
-        somme_cout = somme_cout + dict_route_complete[numero][5]
-        if somme_cout < B:
-            Liste_trajet_finale.append(camion)
-            utilite = utilite + dict_route_complete[numero][2]
-        else:
-            return Liste_trajet_finale, utilite
-
-    # On améliore le résultat
-    for i in n_ameliorations:
-        index = np.randint(len(Liste_trajet_finale)-1)
-        
-    return Liste_trajet_finale, utilite
-"""
 
 
 h = graph_from_file("input/network.2.in")
@@ -276,20 +250,20 @@ h_mst = h.kruskal()
 r = routes_from_file("input/routes.2.in")
 t = trucks_from_file("input/trucks.2.in")
 z = truckperpath(r, t, h_mst)
-#print(knapsack_dynamic(2500000, z))
-a, b = rapport(25e9,z)
-print(a)
+# print(knapsack_dynamic(2500000, z))
+a, b = rapport(int(25e9), z)
+
 print(b, "rapport")
 
-#print(knapsack_dynamic_2(25000000, z))
+# print(knapsack_dynamic_2(25000000, z))
 
 
-#print(z)
-#a, b = rapport(25e9,z)
-#print(b, "rapport")
-#e, f, d = knapsack_greedy(25e9, z)
-#print(d, "greedy")
-#print(knapsack_dynamic(25e9, z))
+# print(z)
+# a, b = rapport(25e9,z)
+# print(b, "rapport")
+# e, f, d = knapsack_greedy(25e9, z)
+# print(d, "greedy")
+# print(knapsack_dynamic(25e9, z))
 
 """
 #print(knapsack_brute_force(25e5, dict_route_complete))
