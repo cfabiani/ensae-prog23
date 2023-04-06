@@ -40,8 +40,9 @@ def temps_routes_opti(filename, filename2):
     # On fait la moyenne et on trouve le temps total
     return ((fin-debut)*max(n/10, 1))
 
-
+"""
 print(temps_routes_opti("input/routes.1.in", "input/network.1.in"))
 print(temps_routes_opti("input/routes.7.in", "input/network.7.in"))
 print(temps_routes_opti("input/routes.8.in", "input/network.8.in"))
 print(temps_routes_opti("input/routes.9.in", "input/network.9.in"))
+"""

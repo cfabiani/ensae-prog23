@@ -1,5 +1,5 @@
-
 from graph import Graph, graph_from_file
+import time
 
 # import graphviz
 # from graphviz import Digraph
@@ -74,10 +74,10 @@ def truckperpath(dict_route, dict_camion, tree):
     """
     dict_route_complete = dict_route
     profondeurs, parents = tree.find_parents(1)
-    check = 0
+    # check = 0
     for trajet in dict_route_complete:
-        check = check + 1
-        print(check)
+        # check = check + 1
+        # print(check)
         src, dest, gain = dict_route[trajet]
         # On cherche le min_power du trajet
         inutile, p = tree.min_power_opti(src, dest, profondeurs, parents)
@@ -288,24 +288,27 @@ complete_route(z, "input/routes.2_2.out")
 
 """
 
-z = routes_from_file_2("input/routes.1.out")
-print(knapsack_dynamic_2(25000000, z))
-a, b = rapport(int(25000000), z)
-print(b, "rapport")
-
-# print(knapsack_dynamic_2(25000000, z))
-
-
-# print(z)
-# a, b = rapport(25e9,z)
-# print(b, "rapport")
-# e, f, d = knapsack_greedy(25e9, z)
-# print(d, "greedy")
-# print(knapsack_dynamic(25e9, z))
+# Ci dessous le calcul des temps et des résultats pour le problème du sac à dos
 
 """
-#print(knapsack_brute_force(25e5, dict_route_complete))
-#a,b,c=knapsack_greedy(25e5, dict_route_complete)
-#print(knapsack_dynamic(25e5, dict_route_complete))
-#print(c)
+
+z = routes_from_file_2("input/routes.1.out")
+
+
+debut = time.perf_counter()
+print(knapsack_dynamic_2(250000, z))
+fin = time.perf_counter()
+print(fin-debut, "temps1")
+
+debut2 = time.perf_counter()
+a, b = rapport(int(250000), z)
+print(b)
+fin2 = time.perf_counter()
+print(fin2-debut2, "temps2")
+
+debut3 = time.perf_counter()
+print(knapsack_dynamic(250000, z))
+fin3 = time.perf_counter()
+print(fin3-debut3, "temps3")
+
 """
