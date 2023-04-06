@@ -1,47 +1,10 @@
 
 from graph import Graph, graph_from_file
-import time
+
 # import graphviz
 # from graphviz import Digraph
 
 data_path = "../input/"
-
-
-def temps_routes(filename, filename2):
-    file = open(filename, 'r')
-    lines = file.readlines()
-    file.close()
-    n = len(lines)
-    h = graph_from_file(filename2)
-    # On teste les 10 premiers
-    linesp = lines[1:min(n, 10)+1]
-    debut = time.perf_counter()
-    for line in linesp:       
-        words = line.split()
-        h.min_power(int(words[0]), int(words[1]))
-    fin = time.perf_counter()
-    # On fait la moyenne et on trouve le temps total
-    return ((fin-debut)*max(n/10, 1))
-
-
-def temps_routes_opti(filename, filename2):
-    file = open(filename, 'r')
-    lines = file.readlines()
-    file.close()
-    n = len(lines)
-    h = graph_from_file(filename2)
-    # On teste les 10 premiers
-    linesp = lines[1:min(n, 10)+1]
-    # On crée l'arbre et les dictionnaires nécéssaires
-    b = h.kruskal()
-    profondeurs, parents = b.find_parents(1)
-    debut = time.perf_counter()
-    for line in linesp:
-        words = line.split()
-        b.min_power_opti(int(words[0]), int(words[1]), profondeurs, parents)
-    fin = time.perf_counter()
-    # On fait la moyenne et on trouve le temps total
-    return ((fin-debut)*max(n/10, 1))
 
 
 def routes_from_file(filename):
@@ -57,6 +20,27 @@ def routes_from_file(filename):
         R[i].append(int(words[0]))
         R[i].append(int(words[1]))
         R[i].append(int(words[2]))
+    return R
+
+
+def routes_from_file_2(filename):
+    # Cette fonction lit les fichiers routes.x.out comme graph_from_file
+    file = open(filename, 'r')
+    lines = file.readlines()
+    file.close()
+
+    R = {}
+    i = 0
+    for line in lines:
+        i += 1
+        R[i] = []
+        words = line.split()
+        R[i].append(int(words[0]))
+        R[i].append(int(words[1]))
+        R[i].append(int(words[2]))
+        R[i].append(int(words[3]))
+        R[i].append(int(words[4]))
+        R[i].append(int(words[5]))
     return R
 
 
@@ -111,6 +95,22 @@ def truckperpath(dict_route, dict_camion, tree):
         dict_route_complete[trajet].append(meilleur_camion)
         dict_route_complete[trajet].append(cout_minimal)
     return dict_route_complete
+
+
+def complete_route(trucks, filename):
+    """A partir du dictionnaire obtenu avec la fonction trucks from file,
+    On crée un fichier routes out qui est équivalent au fichier
+    routes in mais où on rajoute à chaque ligne
+    le power min du trajet, le numéro du camion optimal et le cout de
+    ce camion.
+
+    """
+    with open(filename, 'w') as file:
+        for i in trucks.values():
+            i2 = str(i[0]) + " " + str(i[1]) + " " + str(i[2]) + " " + str(i[3]) + " " + str(i[4]) + " " + str(i[5])
+            print(i2)
+            Ligne = i2 + "\n"
+            file.write(Ligne)
 
 
 def knapsack_brute_force(B, dict_route_complete, pt=None, ut=None, n=None):
@@ -180,23 +180,24 @@ def knapsack_dynamic_2(B, dict_route_complete):
     returns:
         liste: Collection de camion et de trajet, et l'utilité totale
 
-    knapsack_dynamic permet de trouver la collection de camion/trajet qui
+    knapsack_dynamic_2 permet de trouver la collection de camion/trajet qui
     maximise l'utilité totale, en utilisant la méthode dynamique
+    quand tous les couts sont multiples de 10 000
     """
     n = len(dict_route_complete)
-    pt = [dict_route_complete[i][-1] // 50000 for i in dict_route_complete]
+    pt = [dict_route_complete[i][-1] // 10000 for i in dict_route_complete]
     ut = [dict_route_complete[i][2] for i in dict_route_complete]
-    K = [[0 for i in range(B//50000+1)] for j in range(len(dict_route_complete)+1)]
+    K = [[0 for i in range(B//10000+1)] for j in range(len(dict_route_complete)+1)]
     for i in range(n+1):
         # print("ok")
-        for j in range(B//50000+1):
+        for j in range(B//10000+1):
             if i == 0 or j == 0:
                 K[i][j] = 0
             elif pt[i-1] <= j:
                 K[i][j] = max(ut[i-1]+K[i-1][j-pt[i-1]], K[i-1][j])
             else:
                 K[i][j] = K[i-1][j]
-    return K[n][B//50000]
+    return K[n][B//10000]
 
 
 def rapport(B, dict_route_complete):
@@ -245,14 +246,51 @@ def rapport(B, dict_route_complete):
     return Liste_trajet_finale, utilite
 
 
+# Génération des routes ci_dessous
+
+"""
+Exemple de la génération du fichier routes.1.out
+qui associe routes.1.in, network.1.in et trucks.1.in
+
+h = graph_from_file("input/network.1.in")
+h_mst = h.kruskal()
+r = routes_from_file("input/routes.1.in")
+t = trucks_from_file("input/trucks.1.in")
+
+z = truckperpath(r, t, h_mst)
+complete_route(z, "input/routes.1.out")
+
+----------------------------------------
+
+Exemple de la génération du fichier routes.2_1.out
+qui associe routes.2.in, network.2.in et trucks.1.in
+
 h = graph_from_file("input/network.2.in")
 h_mst = h.kruskal()
 r = routes_from_file("input/routes.2.in")
 t = trucks_from_file("input/trucks.2.in")
-z = truckperpath(r, t, h_mst)
-# print(knapsack_dynamic(2500000, z))
-a, b = rapport(int(25e9), z)
 
+z = truckperpath(r, t, h_mst)
+complete_route(z, "input/routes.2_2.out")
+
+---------------------------------------
+
+Exemple de la génération du fichier routes.2_1.out
+qui associe routes.2.in, network.2.in et trucks.2.in
+
+h = graph_from_file("input/network.2.in")
+h_mst = h.kruskal()
+r = routes_from_file("input/routes.2.in")
+t = trucks_from_file("input/trucks.2.in")
+
+z = truckperpath(r, t, h_mst)
+complete_route(z, "input/routes.2_2.out")
+
+"""
+
+z = routes_from_file_2("input/routes.1.out")
+print(knapsack_dynamic_2(25000000, z))
+a, b = rapport(int(25000000), z)
 print(b, "rapport")
 
 # print(knapsack_dynamic_2(25000000, z))

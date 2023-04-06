@@ -713,5 +713,3 @@ def graph_from_file(filename):
                 raise Exception("Format incorrect")
     return g
 
-
-
